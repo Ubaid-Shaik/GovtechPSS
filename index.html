@@ -49,6 +49,8 @@
   .actions{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;width:100%;max-width:360px;margin-top:2px}
   .actbtn{flex:1 1 150px;font-family:var(--display);font-weight:800;letter-spacing:.02em;text-transform:uppercase;color:#fff;background:var(--red);text-decoration:none;padding:clamp(11px,1.6vh,14px) 10px;border-radius:12px;font-size:clamp(12px,1.6vh,14px);box-shadow:0 10px 30px rgba(206,42,52,.3);display:flex;align-items:center;justify-content:center;gap:7px;text-align:center;transition:background .2s,transform .2s}
   .actbtn:hover{background:var(--red-ink);transform:translateY(-1px)}
+  .minibtn{margin-top:9px;font-size:clamp(11px,1.4vh,13px);color:var(--grey);text-decoration:none;font-family:var(--body);letter-spacing:.01em;border-bottom:1px dashed rgba(0,0,0,.22);padding-bottom:1px;transition:color .2s,border-color .2s}
+  .minibtn:hover{color:var(--red);border-color:var(--red)}
   .controls{position:fixed;bottom:calc(14px + env(safe-area-inset-bottom,0px));left:14px;z-index:9;display:flex;gap:8px;flex-wrap:wrap;transition:opacity .3s}
   body.idle .controls{opacity:0;pointer-events:none}
   .cbtn{font-family:var(--body);font-size:13px;color:#fff;background:rgba(18,18,20,.82);backdrop-filter:blur(8px);border:1px solid var(--line-d);border-radius:11px;padding:9px 14px;cursor:pointer;transition:background .2s,transform .2s,border-color .2s}
@@ -100,6 +102,7 @@
       <a class="actbtn" href="card.html">📇 Scan a card</a>
       <a class="actbtn" href="assess.html">📊 Readiness check</a>
     </div>
+    <a class="minibtn" href="rps.html">🎮 Beat the AI · Rock Paper Scissors</a>
   </div>
 </div>
 
