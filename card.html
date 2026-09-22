@@ -234,7 +234,7 @@
     cv.getContext("2d").drawImage(video,cx,cy,cw,ch,0,0,cw,ch);
     capturedCanvas=cv;
     $("#reviewImg").src=cv.toDataURL("image/jpeg",0.85);
-    runOCR(preprocess(cv));
+    runOCR(cv);
   }
   function preprocess(src){
     var scale = src.width<1000?2:(src.width<1800?1.5:1.2);
@@ -253,14 +253,27 @@
     s.onload=function(){res();}; s.onerror=function(){rej(new Error("load"));}; document.head.appendChild(s);
   }); }
   function runOCR(cv){
-    show("#paneProc"); $("#procPct").textContent="0%"; $("#procMsg").textContent="Reading the card…";
+    show("#paneProc"); $("#procPct").textContent=""; $("#procMsg").textContent="Reading the card…";
+    var b64=cv.toDataURL("image/jpeg",0.9).split(",")[1];
+    cloudOCR(b64).then(function(text){
+      if(text!=null){ fillFields(parseCard(text)); show("#paneReview"); }
+      else { tesseractOCR(cv); }
+    });
+  }
+  function cloudOCR(b64){
+    return fetch("/api/ocr",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({image:b64})})
+      .then(function(r){ if(!r.ok) return null; return r.json(); })
+      .then(function(j){ return j&&typeof j.text==="string" ? j.text : null; })
+      .catch(function(){ return null; });
+  }
+  function tesseractOCR(cv){
+    $("#procPct").textContent="0%"; $("#procMsg").textContent="Reading the card…";
     ensureTesseract().then(function(){
-      return Tesseract.recognize(cv,"eng",{logger:function(m){ if(m.status==="recognizing text"){ $("#procPct").textContent=Math.round(m.progress*100)+"%"; } }});
+      return Tesseract.recognize(preprocess(cv),"eng",{logger:function(m){ if(m.status==="recognizing text"){ $("#procPct").textContent=Math.round(m.progress*100)+"%"; } }});
     }).then(function(r){
       fillFields(parseCard((r&&r.data&&r.data.text)||"")); show("#paneReview");
     }).catch(function(){
-      fillFields({}); $("#reviewImg").src=capturedCanvas?capturedCanvas.toDataURL("image/jpeg",0.85):"";
-      show("#paneReview");
+      fillFields({}); show("#paneReview");
     });
   }
 
