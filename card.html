@@ -67,6 +67,9 @@
   #reviewImg{width:150px;flex:0 0 150px;border-radius:10px;border:1px solid var(--line);object-fit:cover;aspect-ratio:1.75}
   .review-top .lead{font-size:13.5px;color:var(--grey);line-height:1.5}
   .review-top .lead b{color:var(--char);font-family:var(--display)}
+  .ocrbadge{display:none;font-family:var(--body);font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;padding:3px 9px;border-radius:999px;vertical-align:middle}
+  .ocrbadge.azure{display:inline-block;background:#e7f6ec;color:#1B8F4D;border:1px solid rgba(27,143,77,.3)}
+  .ocrbadge.fallback{display:inline-block;background:#fff4e6;color:#B26A00;border:1px solid rgba(178,106,0,.3)}
   .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
   .fld{display:flex;flex-direction:column;gap:5px}
   .fld.full{grid-column:1 / -1}
@@ -140,7 +143,7 @@
     <div class="pane" id="paneReview">
       <div class="review-top">
         <img id="reviewImg" alt="Captured card">
-        <div class="lead"><b>Check the details.</b><br>OCR isn't perfect — fix anything below, then save. Email &amp; cell are usually most reliable.</div>
+        <div class="lead"><b>Check the details.</b> <span id="ocrSrc" class="ocrbadge"></span><br>OCR isn't perfect — fix anything below, then save. Email &amp; cell are usually most reliable.</div>
       </div>
       <div class="grid">
         <div class="fld"><label>First name</label><input id="f_first" autocomplete="off"></div>
@@ -256,10 +259,11 @@
     show("#paneProc"); $("#procPct").textContent=""; $("#procMsg").textContent="Reading the card…";
     var b64=cv.toDataURL("image/jpeg",0.9).split(",")[1];
     cloudOCR(b64).then(function(text){
-      if(text!=null){ fillFields(parseCard(text)); show("#paneReview"); }
+      if(text!=null){ setSrc("azure"); fillFields(parseCard(text)); show("#paneReview"); }
       else { tesseractOCR(cv); }
     });
   }
+  function setSrc(kind){ var e=$("#ocrSrc"); if(!e) return; if(kind==="azure"){ e.className="ocrbadge azure"; e.textContent="Read by Azure ✓"; } else { e.className="ocrbadge fallback"; e.textContent="Fallback engine"; } }
   function cloudOCR(b64){
     return fetch("/api/ocr",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({image:b64})})
       .then(function(r){ if(!r.ok) return null; return r.json(); })
@@ -271,9 +275,9 @@
     ensureTesseract().then(function(){
       return Tesseract.recognize(preprocess(cv),"eng",{logger:function(m){ if(m.status==="recognizing text"){ $("#procPct").textContent=Math.round(m.progress*100)+"%"; } }});
     }).then(function(r){
-      fillFields(parseCard((r&&r.data&&r.data.text)||"")); show("#paneReview");
+      fillFields(parseCard((r&&r.data&&r.data.text)||"")); setSrc("fallback"); show("#paneReview");
     }).catch(function(){
-      fillFields({}); show("#paneReview");
+      fillFields({}); setSrc("fallback"); show("#paneReview");
     });
   }
 
